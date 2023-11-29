@@ -51,32 +51,39 @@ int expect(Parser* parser, char* token)
 
 struct ast_node* expr(Parser* parser)
 {
-    term(parser);
-    expr_rest(parser);
+    struct ast_node* left = term(parser);
+    return expr_tail(parser, left);
 }
 
-struct ast_node* expr_rest(Parser* parser)
+struct ast_node* expr_tail(Parser* parser, struct ast_node* left)
 {
     if(strcmp(next(parser), "+") == 0 || strcmp(next(parser), "-") == 0 )
     {
-        consume(parser);
-        term(parser);
+        char* token = consume(parser);
+        struct ast_node* right = term(parser);
+        struct ast_node* new = ast_op(token[0], left, right);
+        return expr_tail(parser, new);
     }
+
+    return left;
 }
 
 struct ast_node* term(Parser* parser)
 {
-    factor(parser);
-    term_rest(parser);
+    struct ast_node* left = factor(parser);
+    return term_tail(parser, left);
 }
 
-struct ast_node* term_rest(Parser* parser)
+struct ast_node* term_tail(Parser* parser, struct ast_node* left)
 {
     if(strcmp(next(parser), "*") == 0 || strcmp(next(parser), "/") == 0 )
     {
-        consume(parser);
-        factor(parser);
+        char* token = consume(parser);
+        struct ast_node* right = factor(parser);
+        struct ast_node* new = ast_op(token[0], left, right);
+        return term_tail(parser, new);
     }
+    return left;
 }
 
 struct ast_node* factor(Parser* parser)
@@ -93,57 +100,6 @@ struct ast_node* factor(Parser* parser)
         consume(parser);
         t = expr(parser);
         expect(parser, ")");
-    }
-    else
-    {
-        error();
-    }
-}
-
-/*void term(Parser* parser)
-{
-    struct ast_node* n1 = factor(parser);
-    struct ast_node* n2 = term_tail(parser);
-}
-
-struct ast_node* term_tail(Parser* parser)
-{
-    if(strcmp(next(parser), "+") == 0 || strcmp(next(parser), "-") == 0 )
-    {
-        consume(parser);
-        term(parser);
-    }
-}
-
-void factor(Parser* parser)
-{
-    primary(parser);
-    factor_tail(parser);
-}
-
-void factor_tail(Parser* parser)
-{
-    if(strcmp(next(parser), "*") == 0 || strcmp(next(parser), "/") == 0 )
-    {
-        consume(parser);
-        factor(parser);
-    }
-}
-
-void primary(Parser* parser)
-{
-    struct ast_node* t;
-    if(atoi(next(parser)))
-    {
-        t = ast_num(atoi(next(parser)));
-        consume(parser);
-        return t;
-    }
-    else if(strcmp(next(parser), "(") == 0)
-    {
-        consume(parser);
-        t = term(parser);
-        expect(parser, ")");
         return t;
     }
     else
@@ -151,4 +107,3 @@ void primary(Parser* parser)
         error();
     }
 }
-*/

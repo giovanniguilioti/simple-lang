@@ -21,11 +21,11 @@ int expect(Parser* rec, char* token);
 
 struct ast_node* expr(Parser* parser);
 
-struct ast_node* expr_rest(Parser* parser);
+struct ast_node* expr_tail(Parser* parser, struct ast_node* left);
 
 struct ast_node* term(Parser* parser);
 
-struct ast_node* term_rest(Parser* parser);
+struct ast_node* term_tail(Parser* parser, struct ast_node* left);
 
 struct ast_node* factor(Parser* parser);
 

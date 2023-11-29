@@ -6,6 +6,7 @@
 #include "lexer.h"
 #include "list.h"
 #include "parser.h"
+#include "ast.h"
 
 int main()
 {
@@ -22,5 +23,6 @@ int main()
     }
 
     Parser* parser = parser_init(list);
-    expr(parser);
+    struct ast_node* ast = expr(parser);
+    ast_print(ast, 0);
 }

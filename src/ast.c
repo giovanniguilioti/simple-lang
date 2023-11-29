@@ -41,12 +41,12 @@ struct ast_node* ast_num(int v)
     return new;
 }
 
-void ast_post(struct ast_node* n)
+void ast_post_order(struct ast_node* n)
 {
     if (n != NULL)
     {
-        ast_post(n->left);
-        ast_post(n->right);
+        ast_post_order(n->left);
+        ast_post_order(n->right);
         switch(n->type)
         {
             case AST_NUMBER:
@@ -56,6 +56,43 @@ void ast_post(struct ast_node* n)
                 printf("%c | ", n->op);
                 break;
         }
-        
     }
+}
+
+void ast_print(struct ast_node* node, int space)
+{
+    if (node == NULL) {
+        return;
+    }
+
+    space += 10;
+
+    ast_print(node->right, space);
+
+    for (int i = 10; i < space; i++) {
+        printf("  ");
+    }
+
+    switch (node->type)
+    {
+        case AST_NUMBER:
+            printf("%d\n", node->value);
+            break;
+        case AST_ADD:
+            printf("+\n");
+            break;
+        case AST_SUB:
+            printf("-\n");
+            break;
+        case AST_MULT:
+            printf("*\n");
+            break;
+        case AST_DIV:
+            printf("/\n");
+            break;
+        default:
+            exit(1);
+    }
+
+    ast_print(node->left, space);
 }

@@ -6,6 +6,5 @@ term            -> factor term_tail
 term_tail       -> * factor term_tail
                  | / factor term_tail
                  | empty
-primary         -> ( expr )
+factor          -> ( expr )
                  | NUMBER
-

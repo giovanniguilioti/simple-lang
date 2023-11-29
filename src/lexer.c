@@ -67,9 +67,9 @@ Token* lexer_get_next_token(Lexer* lexer)
 
 Token* lexer_advance_with_token(Lexer* lexer, Token* token)
 {
-        lexer_advance(lexer);
+    lexer_advance(lexer);
 
-        return token;
+    return token;
 }
 
 char* lexer_get_current_char_as_string(Lexer* lexer)
@@ -109,7 +109,7 @@ Token* lexer_collect_num(Lexer* lexer, int minus)
 
 Token* lexer_handle_minus(Lexer* lexer)
 {
-    if(lexer->contents[lexer->i] == '-')
+    if(isdigit(lexer->contents[lexer->i+1]))
         return lexer_collect_num(lexer, 1);
 
     return lexer_advance_with_token(lexer, token_init(TOKEN_SUB, lexer_get_current_char_as_string(lexer)));
