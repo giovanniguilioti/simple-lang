@@ -5,21 +5,21 @@
 
 struct token_node
 {
-    Token token;
+    struct token token;
     struct token_node* next;
 };
 
-typedef struct
+struct list
 {
     struct token_node* head;
-}List;
+};
 
-List* list_init();
+struct list* list_init();
 
 int list_empty(struct token_node* head);
 
-List* list_push(List* list, Token* token);
+struct list* list_push(struct list* list, struct token* token);
 
-struct token_node* list_at(List* list, int index);
+struct token_node* list_at(struct list* list, int index);
 
 #endif

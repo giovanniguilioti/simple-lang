@@ -1,9 +1,9 @@
 #include "list.h"
 #include <stdio.h>
 
-List* list_init()
+struct list* list_init()
 {
-    List* list = malloc(sizeof(List));
+    struct list* list = malloc(sizeof(list));
     list->head = NULL;
     return list;
 }
@@ -34,7 +34,7 @@ int list_size(struct token_node* head)
 }
 
 
-List* list_push(List* list, Token* token)
+struct list* list_push(struct list* list, struct token* token)
 {
     struct token_node* new  = malloc(sizeof(struct token_node));
     new->token = *token;
@@ -54,7 +54,7 @@ List* list_push(List* list, Token* token)
     return list;
 }
 
-struct token_node* list_at(List* list, int index)
+struct token_node* list_at(struct list* list, int index)
 {
     if(list_empty(list->head))
         return 0;

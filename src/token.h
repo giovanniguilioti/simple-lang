@@ -3,8 +3,9 @@
 
 #include <stdlib.h>
 
-typedef enum
+enum token_type
 {
+    TOKEN_ID,
     TOKEN_NUM,
     TOKEN_RPAREN,
     TOKEN_LPAREN,
@@ -12,16 +13,17 @@ typedef enum
     TOKEN_SUB,
     TOKEN_MULT,
     TOKEN_DIV,
+    TOKEN_ASSIGN,
     TOKEN_END
-}TokenType; 
+}; 
 
-typedef struct token
+struct token
 {
-    TokenType type;
+    enum token_type type;
 
     char* value;
-}Token;
+};
 
-Token* token_init(int type, char* s);
+struct token* token_init(int type, char* s);
 
 #endif

@@ -11,18 +11,19 @@
 int main()
 {
 
-    Lexer* lexer = lexer_init("-9 * (5 - 2)$");
-    Token* token = (void*)0;
+    struct lexer* lexer = lexer_init("x = 10\ny = 20\nz = x + (y - 5)$");
+    struct token* token = (void*)0;
 
-    List* list = list_init();
+    struct list* list = list_init();
 
     while((token = lexer_get_next_token(lexer)) != (void*)0)
     {
         list_push(list, token);
-        printf("TOKEN[%d, %s]\n", token->type, token->value);
+        //printf("[%d, %s]\n", token->type, token->value);
     }
 
-    Parser* parser = parser_init(list);
-    struct ast_node* ast = expr(parser);
+    struct parser* parser = parser_init(list);
+    struct ast_node* ast = stmts(parser);
     ast_print(ast, 0);
+    //printf("%d", ast->type);
 }

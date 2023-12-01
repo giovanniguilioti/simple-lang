@@ -3,30 +3,36 @@
 
 #include "list.h"
 
-typedef struct
+struct parser
 {
-    List* tokens;
+    struct list* tokens;
     int count;
-}Parser;
+};
 
-Parser* parser_init(List* list);
+struct parser* parser_init(struct list* list);
 
-char* next(Parser* rec);
+char* next(struct parser* rec);
 
-char* consume(Parser* rec);
+char* consume(struct parser* rec);
+
+int expect(struct parser* rec, char* token);
 
 void error();
 
-int expect(Parser* rec, char* token);
+struct ast_node* stmts(struct parser* parser);
 
-struct ast_node* expr(Parser* parser);
+struct ast_node* stmt(struct parser* parser);
 
-struct ast_node* expr_tail(Parser* parser, struct ast_node* left);
+struct ast_node* assignment(struct parser* parser);
 
-struct ast_node* term(Parser* parser);
+struct ast_node* expr(struct parser* parser);
 
-struct ast_node* term_tail(Parser* parser, struct ast_node* left);
+struct ast_node* expr_tail(struct parser* parser, struct ast_node* left);
 
-struct ast_node* factor(Parser* parser);
+struct ast_node* term(struct parser* parser);
+
+struct ast_node* term_tail(struct parser* parser, struct ast_node* left);
+
+struct ast_node* factor(struct parser* parser);
 
 #endif
