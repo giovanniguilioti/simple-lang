@@ -1,6 +1,8 @@
 #ifndef AST_H
 #define AST_H
 
+#include "symtable.h"
+
 enum ast_type
 {
     AST_EMPTY,
@@ -40,6 +42,6 @@ void ast_post_order(struct ast_node* n);
 
 void ast_print(struct ast_node* node, int indent);
 
-void ast_evaluate(struct ast_node* node);
+void ast_evaluate(struct ast_node* node, struct symbol_table* symtable);
 
 #endif

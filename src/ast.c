@@ -1,4 +1,5 @@
 #include "ast.h"
+#include "symtable.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -135,25 +136,33 @@ void ast_print(struct ast_node* node, int space)
     ast_print(node->left, space);
 }
 
-void ast_evaluate(struct ast_node* node)
+void ast_evaluate(struct ast_node* node, struct symbol_table* symtable)
 {
     if (node == NULL) {
         return;
     }
 
-    ast_evaluate(node->left);
-    ast_evaluate(node->right);
+    ast_evaluate(node->left, symtable);
+    ast_evaluate(node->right, symtable);
 
     switch (node->type)
     {
         case AST_NUMBER:
             return;
         case AST_ADD:
-            node->value = node->left->value + node->right->value;
+            if(node->left->type ==  AST_ID)
+                node->value = symtable_find(symtable, node->left->id) + node->right->value;
+            else
+                node->value = node->left->value + node->right->value;
+
             node->type = AST_NUMBER;
             break;
         case AST_SUB:
-            node->value = node->left->value - node->right->value;
+            if(node->left->type ==  AST_ID)
+                node->value = symtable_find(symtable, node->left->id) - node->right->value;
+            else
+                node->value = node->left->value - node->right->value;
+
             node->type = AST_NUMBER;
             break;
         case AST_MULT:
@@ -164,7 +173,13 @@ void ast_evaluate(struct ast_node* node)
             node->value = node->left->value / node->right->value;
             node->type = AST_NUMBER;
             break;
+        case AST_ASSIGN:
+            if(!symtable_find(symtable, node->left->id))
+                symtable_push(symtable, node->left->id, node->right->value);
+            else
+                symtable_update(symtable, node->left->id, node->right->value);
+            break;
         default:
-            exit(1);
+            return;
     }
 }
