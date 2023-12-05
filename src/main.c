@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 
 #include "token.h"
@@ -11,9 +12,18 @@
 
 char* readFile(char* filename);
 
-int main()
+int main(int argc, char* argv[])
 {
-    char* content = readFile(".//example//01");
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+    
+    char filename[100];
+    strcpy(filename, ".//example//");
+    strcat(filename, argv[1]);
+    
+    char* content = readFile(filename);
 
     struct lexer* lexer = lexer_init(content);
     struct token* token = (void*)0;
@@ -34,7 +44,7 @@ int main()
     struct symbol* node = symtable->head;
     while(node != NULL)
     {
-        printf("\n%s: %d\n", node->name, node->value);
+        printf("%s: %d\n", node->name, node->value);
         node = node->next;
     }/*
     printf("\n%s: %d\n", symtable->head->name, symtable->head->value);*/

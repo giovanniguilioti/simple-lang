@@ -40,7 +40,7 @@ void error(struct parser* parser)
 
 struct ast_node* stmts(struct parser* parser)
 {
-    if (parser->lookahead->type == TOKEN_ID || parser->lookahead->type == TOKEN_NUM)
+    if (parser->lookahead->type != TOKEN_END)
     {
         struct ast_node* stmt_node = stmt(parser);
         struct ast_node* stmts_tail_node = stmts(parser);
@@ -63,6 +63,24 @@ struct ast_node* stmt(struct parser* parser)
 {
     if (parser->lookahead->type == TOKEN_ID)
         return assignment(parser);
+    else if(parser->lookahead->type == TOKEN_VARDECL)
+        return vardecl(parser);
+    else
+        error(parser);
+}
+
+struct ast_node* vardecl(struct parser* parser)
+{
+    if(parser->lookahead->type == TOKEN_VARDECL)
+    {
+        match(parser, "var");
+        char* id = parser->lookahead->value;
+        match(parser, parser->lookahead->value);
+        match(parser, "="); 
+        struct ast_node* assignment_node = ast_op(AST_VARDECL, ast_id(id), expr(parser));
+        match(parser, ";");
+        return assignment_node;
+    }
     else
         error(parser);
 }
@@ -74,7 +92,7 @@ struct ast_node* assignment(struct parser* parser)
     if(parser->lookahead->type == TOKEN_ASSIGN)
     {
         match(parser, parser->lookahead->value);
-        struct ast_node* assignment_node = ast_op('=', ast_id(id), expr(parser));
+        struct ast_node* assignment_node = ast_op(AST_ASSIGN, ast_id(id), expr(parser));
         return assignment_node;
     }
     else
@@ -93,14 +111,14 @@ struct ast_node* expr_tail(struct parser* parser, struct ast_node* left)
     {
         match(parser, "+");
         struct ast_node* right = term(parser);
-        struct ast_node* new = ast_op('+', left, right);
+        struct ast_node* new = ast_op(AST_ADD, left, right);
         return expr_tail(parser, new);
     }
     else if(parser->lookahead->type == TOKEN_SUB)
     {
         match(parser, "-");
         struct ast_node* right = term(parser);
-        struct ast_node* new = ast_op('-', left, right);
+        struct ast_node* new = ast_op(AST_SUB, left, right);
         return expr_tail(parser, new);
     }
 
@@ -119,14 +137,14 @@ struct ast_node* term_tail(struct parser* parser, struct ast_node* left)
     {
         match(parser, "*");
         struct ast_node* right = factor(parser);
-        struct ast_node* new = ast_op('*', left, right);
+        struct ast_node* new = ast_op(AST_MULT, left, right);
         return term_tail(parser, new);
     }
     else if(parser->lookahead->type == TOKEN_DIV)
     {
         match(parser, "/");
         struct ast_node* right = factor(parser);
-        struct ast_node* new = ast_op('/', left, right);
+        struct ast_node* new = ast_op(AST_DIV, left, right);
         return term_tail(parser, new);
     }
 

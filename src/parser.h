@@ -20,6 +20,8 @@ struct ast_node* stmts(struct parser* parser);
 
 struct ast_node* stmt(struct parser* parser);
 
+struct ast_node* vardecl(struct parser* parser);
+
 struct ast_node* assignment(struct parser* parser);
 
 struct ast_node* expr(struct parser* parser);

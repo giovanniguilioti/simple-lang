@@ -12,7 +12,8 @@ enum ast_type
     AST_SUB,
     AST_MULT,
     AST_DIV,
-    AST_ASSIGN
+    AST_ASSIGN,
+    AST_VARDECL,
 };
 
 struct ast_node
@@ -34,11 +35,13 @@ struct ast_node* ast_empty(enum ast_type type);
 
 struct ast_node* ast_num(int v);
 
-struct ast_node* ast_op(char c, struct ast_node* l, struct ast_node* r);
+struct ast_node* ast_op(enum ast_type type, struct ast_node* l, struct ast_node* r);
 
 struct ast_node* ast_id(char* id);
 
 void ast_evaluate(struct ast_node* node, struct symbol_table* symtable);
+
+void ast_evaluate_vardecl(struct ast_node* node, struct symbol_table* symtable);
 
 void ast_evaluate_add(struct ast_node* node, struct symbol_table* symtable);
 

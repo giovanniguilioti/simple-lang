@@ -62,6 +62,8 @@ struct token* lexer_get_next_token(struct lexer* lexer)
                 return lexer_advance_with_token(lexer, token_init(TOKEN_RPAREN, lexer_get_current_char_as_string(lexer))); break;
             case '=':
                 return lexer_advance_with_token(lexer, token_init(TOKEN_ASSIGN, lexer_get_current_char_as_string(lexer))); break;
+            case ';':
+                return lexer_advance_with_token(lexer, token_init(TOKEN_SEMICOLON, lexer_get_current_char_as_string(lexer))); break;
             case '$':
                 return lexer_advance_with_token(lexer, token_init(TOKEN_END, lexer_get_current_char_as_string(lexer))); break;
         }
@@ -122,8 +124,6 @@ struct token* lexer_handle_minus(struct lexer* lexer)
 
 struct token* lexer_collect_identifier(struct lexer* lexer)
 {
-    int token_type = TOKEN_ID;
-
     char* value = calloc(1, sizeof(char));
 
     while (isalpha(lexer->c))
@@ -133,5 +133,8 @@ struct token* lexer_collect_identifier(struct lexer* lexer)
         lexer_advance(lexer);
     }
 
-    return token_init(token_type, value);
+    if(strcmp(value, "var") == 0)
+        return token_init(TOKEN_VARDECL, value);
+    else
+        return token_init(TOKEN_ID, value);
 }

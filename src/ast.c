@@ -14,30 +14,33 @@ struct ast_node* ast_empty(enum ast_type type)
     return new;
 }
 
-struct ast_node* ast_op(char c, struct ast_node* l, struct ast_node* r)
+struct ast_node* ast_op(enum ast_type type, struct ast_node* l, struct ast_node* r)
 {
     struct ast_node* new = malloc(sizeof(struct ast_node));
     
-    switch(c)
+    switch(type)
     {
-        case '=': 
-            new->type = AST_ASSIGN;
+        case AST_VARDECL:
+            new->op = '=';
             break;
-        case '+':
-            new->type = AST_ADD;
+        case AST_ASSIGN: 
+            new->op = '=';
             break;
-        case '-':
-            new->type = AST_SUB;
+        case AST_ADD:
+            new->op = '+';
             break;
-        case '*':
-            new->type = AST_MULT;
+        case AST_SUB:
+            new->op = '-';
             break;
-        case '/': 
-            new->type = AST_DIV;
+        case AST_MULT:
+            new->op = '*';
+            break;
+        case AST_DIV: 
+            new->op = '/';
             break;
     }
 
-    new->op = c;
+    new->type = type;
     new->left = l;
     new->right = r;
 
@@ -61,6 +64,18 @@ struct ast_node* ast_id(char* id)
     struct ast_node* new = malloc(sizeof(struct ast_node));
     new->type = AST_ID;
     new->id = id;
+
+    new->right = NULL;
+    new->left = NULL;
+
+    return new;
+}
+
+struct ast_node* ast_vardecl(char* id)
+{
+    struct ast_node* new = malloc(sizeof(struct ast_node));
+    new->type = AST_VARDECL;
+    new->op = '=';
 
     new->right = NULL;
     new->left = NULL;
@@ -93,6 +108,9 @@ void ast_evaluate(struct ast_node* node, struct symbol_table* symtable)
             break;
         case AST_ASSIGN:
             ast_evaluate_assign(node, symtable);
+            break;
+        case AST_VARDECL:
+            ast_evaluate_vardecl(node, symtable);
             break;
         case AST_NUMBER:
         default:
@@ -142,10 +160,24 @@ void ast_evaluate_div(struct ast_node* node, struct symbol_table* symtable)
 
 void ast_evaluate_assign(struct ast_node* node, struct symbol_table* symtable)
 {
+    if(symtable_find(symtable, node->left->id))
+        symtable_update(symtable, node->left->id, node->right->value);
+    else
+    {
+        printf("variavel: '%s' ja existe.\n", node->left->id);
+        exit(1);
+    }
+}
+
+void ast_evaluate_vardecl(struct ast_node* node, struct symbol_table* symtable)
+{
     if(!symtable_find(symtable, node->left->id))
         symtable_push(symtable, node->left->id, node->right->value);
     else
-        symtable_update(symtable, node->left->id, node->right->value);
+    {
+        printf("variavel: '%s' ja existe.\n", node->left->id);
+        exit(1);
+    }
 }
 
 void ast_post_order(struct ast_node* n)
@@ -205,6 +237,9 @@ void ast_print(struct ast_node* node, int space)
             break;
         case AST_ASSIGN:
             printf("=\n");
+            break;
+        case AST_VARDECL:
+            printf("vardecl\n");
             break;
         case AST_EMPTY:
             printf("empty\n");

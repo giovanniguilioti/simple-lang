@@ -7,6 +7,7 @@ enum token_type
 {
     TOKEN_ID,
     TOKEN_NUM,
+    TOKEN_SEMICOLON,
     TOKEN_RPAREN,
     TOKEN_LPAREN,
     TOKEN_ADD,
@@ -14,6 +15,7 @@ enum token_type
     TOKEN_MULT,
     TOKEN_DIV,
     TOKEN_ASSIGN,
+    TOKEN_VARDECL,
     TOKEN_END
 }; 
 

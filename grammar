@@ -1,6 +1,8 @@
 stmts           -> stmt stmts
                  | empty
 stmt            -> assignment
+                 | vardecl
+vardecl         -> VAR IDENTIFIER = expr ;
 assignment      -> IDENTIFIER = expr
 expr            -> term expr_tail
 expr_tail       -> + term expr_tail
