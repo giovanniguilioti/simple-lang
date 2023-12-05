@@ -9,17 +9,17 @@ struct token_node
     struct token_node* next;
 };
 
-struct list
+struct token_list
 {
     struct token_node* head;
 };
 
-struct list* list_init();
+struct token_list* list_init();
 
 int list_empty(struct token_node* head);
 
-struct list* list_push(struct list* list, struct token* token);
+struct token_list* list_push(struct token_list* list, struct token* token);
 
-struct token_node* list_at(struct list* list, int index);
+struct token* list_at(struct token_list* list, int index);
 
 #endif

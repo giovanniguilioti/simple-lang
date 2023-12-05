@@ -4,7 +4,7 @@
 
 #include "token.h"
 #include "lexer.h"
-#include "list.h"
+#include "token_list.h"
 #include "parser.h"
 #include "ast.h"
 #include "symtable.h"
@@ -18,7 +18,7 @@ int main()
     struct lexer* lexer = lexer_init(content);
     struct token* token = (void*)0;
 
-    struct list* list = list_init();
+    struct token_list* list = list_init();
 
     while((token = lexer_get_next_token(lexer)) != (void*)0)
     {

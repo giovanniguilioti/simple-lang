@@ -1,23 +1,20 @@
 #ifndef RECOGNIZER_H
 #define RECOGNIZER_H
 
-#include "list.h"
+#include "token_list.h"
 
 struct parser
 {
-    struct list* tokens;
+    struct token_list* tokens;
+    struct token* lookahead;
     int count;
 };
 
-struct parser* parser_init(struct list* list);
+struct parser* parser_init(struct token_list* list);
 
-char* next(struct parser* rec);
+void match(struct parser* parser, char* token);
 
-char* consume(struct parser* rec);
-
-int expect(struct parser* rec, char* token);
-
-void error();
+void error(struct parser* parser);
 
 struct ast_node* stmts(struct parser* parser);
 

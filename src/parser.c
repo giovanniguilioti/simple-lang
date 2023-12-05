@@ -1,5 +1,4 @@
 #include "parser.h"
-#include "list.h"
 #include "ast.h"
 #include "token.h"
 
@@ -7,57 +6,41 @@
 #include <string.h>
 #include <ctype.h>
 
-struct parser* parser_init(struct list* list)
+struct parser* parser_init(struct token_list* list)
 {
     struct parser* parser = calloc(1, sizeof(struct parser));
     parser->tokens = list;
     parser->count = 0;
+    parser->lookahead = list_at(list, parser->count);
     return parser;
 }
 
-struct token current(struct parser* parser)
+static void parser_move(struct parser* parser)
 {
-    return list_at(parser->tokens, parser->count)->token;
+    (parser->count)++;
+    parser->lookahead = list_at(parser->tokens, parser->count);
+
+    if(parser->lookahead->type == TOKEN_END)
+        return;
 }
 
-char* next(struct parser* parser)
+void match(struct parser* parser, char* token)
 {
-    return list_at(parser->tokens, parser->count)->token.value;
-}
-
-char* consume(struct parser* parser)
-{
-    if(strcmp(list_at(parser->tokens, parser->count)->token.value, "$") == 0)
-    {
-        exit(1);
-    }
-
-    char* temp = list_at(parser->tokens, parser->count)->token.value;
-    parser->count++;
-    return temp;
-}
-
-void error()
-{
-    printf("syntax error.:");
-    exit(1);
-}
-
-int expect(struct parser* parser, char* token)
-{
-    if (strcmp(next(parser), token) == 0)
-    {
-        consume(parser);
-    }
+    if(strcmp(parser->lookahead->value, token) == 0)
+        parser_move(parser);
     else
-        error();
+        error(parser);
+}
 
-    return 1;
+void error(struct parser* parser)
+{
+    printf("syntax error\ntoken not expected: %s", parser->lookahead->value);
+    exit(1);
 }
 
 struct ast_node* stmts(struct parser* parser)
 {
-    if (current(parser).type == TOKEN_ID || current(parser).type == TOKEN_NUM)
+    if (parser->lookahead->type == TOKEN_ID || parser->lookahead->type == TOKEN_NUM)
     {
         struct ast_node* stmt_node = stmt(parser);
         struct ast_node* stmts_tail_node = stmts(parser);
@@ -78,19 +61,24 @@ struct ast_node* stmts(struct parser* parser)
 
 struct ast_node* stmt(struct parser* parser)
 {
-    if (current(parser).type == TOKEN_ID)
+    if (parser->lookahead->type == TOKEN_ID)
         return assignment(parser);
+    else
+        error(parser);
 }
 
 struct ast_node* assignment(struct parser* parser)
 {
-    char* id = consume(parser);
-    if(strcmp(next(parser), "=") == 0)
+    char* id = parser->lookahead->value;
+    match(parser, parser->lookahead->value);
+    if(parser->lookahead->type == TOKEN_ASSIGN)
     {
-        char* token = consume(parser);
-        struct ast_node* assignment_node = ast_op(token[0], ast_id(id), expr(parser));
+        match(parser, parser->lookahead->value);
+        struct ast_node* assignment_node = ast_op('=', ast_id(id), expr(parser));
         return assignment_node;
     }
+    else
+        error(parser);
 }
 
 struct ast_node* expr(struct parser* parser)
@@ -101,11 +89,18 @@ struct ast_node* expr(struct parser* parser)
 
 struct ast_node* expr_tail(struct parser* parser, struct ast_node* left)
 {
-    if(strcmp(next(parser), "+") == 0 || strcmp(next(parser), "-") == 0 )
+    if(parser->lookahead->type == TOKEN_ADD)
     {
-        char* token = consume(parser);
+        match(parser, "+");
         struct ast_node* right = term(parser);
-        struct ast_node* new = ast_op(token[0], left, right);
+        struct ast_node* new = ast_op('+', left, right);
+        return expr_tail(parser, new);
+    }
+    else if(parser->lookahead->type == TOKEN_SUB)
+    {
+        match(parser, "-");
+        struct ast_node* right = term(parser);
+        struct ast_node* new = ast_op('-', left, right);
         return expr_tail(parser, new);
     }
 
@@ -120,40 +115,49 @@ struct ast_node* term(struct parser* parser)
 
 struct ast_node* term_tail(struct parser* parser, struct ast_node* left)
 {
-    if(strcmp(next(parser), "*") == 0 || strcmp(next(parser), "/") == 0 )
+    if(parser->lookahead->type == TOKEN_MULT)
     {
-        char* token = consume(parser);
+        match(parser, "*");
         struct ast_node* right = factor(parser);
-        struct ast_node* new = ast_op(token[0], left, right);
+        struct ast_node* new = ast_op('*', left, right);
         return term_tail(parser, new);
     }
+    else if(parser->lookahead->type == TOKEN_DIV)
+    {
+        match(parser, "/");
+        struct ast_node* right = factor(parser);
+        struct ast_node* new = ast_op('/', left, right);
+        return term_tail(parser, new);
+    }
+
     return left;
 }
 
 struct ast_node* factor(struct parser* parser)
 {
     struct ast_node* t;
-    if(atoi(next(parser)))
+    if(parser->lookahead->type == TOKEN_NUM)
     {
-        t = ast_num(atoi(next(parser)));
-        consume(parser);
+        t = ast_num(atoi(parser->lookahead->value));
+        match(parser, parser->lookahead->value);
         return t;
     }
-    else if(strcmp(next(parser), "(") == 0)
+    else if(parser->lookahead->type == TOKEN_LPAREN)
     {
-        consume(parser);
+        match(parser, parser->lookahead->value);
         t = expr(parser);
-        expect(parser, ")");
+        match(parser, ")");
         return t;
     }
-    else if(current(parser).type == TOKEN_ID)
+    else if(parser->lookahead->type == TOKEN_ID)
     {
-        char* id = consume(parser);
+        char* id = parser->lookahead->value;
+        match(parser, parser->lookahead->value);
         t = ast_id(id);
         return t;
     }
     else
     {
-        error();
+        error(parser);
     }
 }

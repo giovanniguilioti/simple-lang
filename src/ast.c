@@ -68,6 +68,86 @@ struct ast_node* ast_id(char* id)
     return new;
 }
 
+void ast_evaluate(struct ast_node* node, struct symbol_table* symtable)
+{
+    if (node == NULL) {
+        return;
+    }
+
+    ast_evaluate(node->left, symtable);
+    ast_evaluate(node->right, symtable);
+
+    switch (node->type)
+    {
+        case AST_ADD:
+            ast_evaluate_add(node, symtable);
+            break;
+        case AST_SUB:
+            ast_evaluate_sub(node, symtable);
+            break;
+        case AST_MULT:
+            ast_evaluate_mult(node, symtable);
+            break;
+        case AST_DIV:
+            ast_evaluate_div(node, symtable);
+            break;
+        case AST_ASSIGN:
+            ast_evaluate_assign(node, symtable);
+            break;
+        case AST_NUMBER:
+        default:
+            return;
+    }
+}
+
+void ast_evaluate_add(struct ast_node* node, struct symbol_table* symtable)
+{
+    if(node->left->type ==  AST_ID)
+        node->value = symtable_find(symtable, node->left->id) + node->right->value;
+    else
+        node->value = node->left->value + node->right->value;
+
+    node->type = AST_NUMBER;
+}
+
+void ast_evaluate_sub(struct ast_node* node, struct symbol_table* symtable)
+{
+    if(node->left->type ==  AST_ID)
+        node->value = symtable_find(symtable, node->left->id) - node->right->value;
+    else
+        node->value = node->left->value - node->right->value;
+
+    node->type = AST_NUMBER;
+}
+
+void ast_evaluate_mult(struct ast_node* node, struct symbol_table* symtable)
+{
+    if(node->left->type ==  AST_ID)
+        node->value = symtable_find(symtable, node->left->id) * node->right->value;
+    else
+        node->value = node->left->value * node->right->value;
+
+    node->type = AST_NUMBER;
+}
+
+void ast_evaluate_div(struct ast_node* node, struct symbol_table* symtable)
+{
+    if(node->left->type ==  AST_ID)
+        node->value = symtable_find(symtable, node->left->id) / node->right->value;
+    else
+        node->value = node->left->value / node->right->value;
+
+    node->type = AST_NUMBER;
+}
+
+void ast_evaluate_assign(struct ast_node* node, struct symbol_table* symtable)
+{
+    if(!symtable_find(symtable, node->left->id))
+        symtable_push(symtable, node->left->id, node->right->value);
+    else
+        symtable_update(symtable, node->left->id, node->right->value);
+}
+
 void ast_post_order(struct ast_node* n)
 {
     if (n != NULL)
@@ -134,52 +214,4 @@ void ast_print(struct ast_node* node, int space)
     }
 
     ast_print(node->left, space);
-}
-
-void ast_evaluate(struct ast_node* node, struct symbol_table* symtable)
-{
-    if (node == NULL) {
-        return;
-    }
-
-    ast_evaluate(node->left, symtable);
-    ast_evaluate(node->right, symtable);
-
-    switch (node->type)
-    {
-        case AST_NUMBER:
-            return;
-        case AST_ADD:
-            if(node->left->type ==  AST_ID)
-                node->value = symtable_find(symtable, node->left->id) + node->right->value;
-            else
-                node->value = node->left->value + node->right->value;
-
-            node->type = AST_NUMBER;
-            break;
-        case AST_SUB:
-            if(node->left->type ==  AST_ID)
-                node->value = symtable_find(symtable, node->left->id) - node->right->value;
-            else
-                node->value = node->left->value - node->right->value;
-
-            node->type = AST_NUMBER;
-            break;
-        case AST_MULT:
-            node->value = node->left->value * node->right->value;
-            node->type = AST_NUMBER;
-            break;
-        case AST_DIV:
-            node->value = node->left->value / node->right->value;
-            node->type = AST_NUMBER;
-            break;
-        case AST_ASSIGN:
-            if(!symtable_find(symtable, node->left->id))
-                symtable_push(symtable, node->left->id, node->right->value);
-            else
-                symtable_update(symtable, node->left->id, node->right->value);
-            break;
-        default:
-            return;
-    }
 }

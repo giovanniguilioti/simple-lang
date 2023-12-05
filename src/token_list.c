@@ -1,9 +1,9 @@
-#include "list.h"
+#include "token_list.h"
 #include <stdio.h>
 
-struct list* list_init()
+struct token_list* list_init()
 {
-    struct list* list = malloc(sizeof(list));
+    struct token_list* list = malloc(sizeof(list));
     list->head = NULL;
     return list;
 }
@@ -34,7 +34,7 @@ int list_size(struct token_node* head)
 }
 
 
-struct list* list_push(struct list* list, struct token* token)
+struct token_list* list_push(struct token_list* list, struct token* token)
 {
     struct token_node* new  = malloc(sizeof(struct token_node));
     new->token = *token;
@@ -54,7 +54,7 @@ struct list* list_push(struct list* list, struct token* token)
     return list;
 }
 
-struct token_node* list_at(struct list* list, int index)
+struct token* list_at(struct token_list* list, int index)
 {
     if(list_empty(list->head))
         return 0;
@@ -73,5 +73,5 @@ struct token_node* list_at(struct list* list, int index)
         ++i;
     }
     
-    return temp;
+    return &temp->token;
 }
